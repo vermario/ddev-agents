@@ -7,6 +7,23 @@ services:
     hostname: agents
     user: vscode
     restart: "no"
+    # Security hardening: Drop all Linux capabilities. The container runs as
+    # non-root (vscode), so capabilities are already inert for the running
+    # process. This additionally restricts the bounding set, preventing even
+    # root (via docker exec -u root) from acquiring capabilities.
+    # No cap_add needed — outbound networking, file I/O, and user-level
+    # package installs (pip, npm) all work without any capabilities.
+    cap_drop:
+      - ALL
+    # Security hardening: Prevent privilege escalation via setuid/setgid
+    # binaries. This intentionally disables sudo inside the container,
+    # closing the passwordless-sudo path in the base devcontainer image.
+    # Root access is still available from the host via:
+    #   docker exec -u root -it <container> bash
+    # Devcontainer feature installation is unaffected (runs during image
+    # build, not in the running container).
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ../:/workspace:cached
       - ddev-global-cache:/mnt/ddev-global-cache
