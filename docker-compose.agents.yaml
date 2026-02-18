@@ -3,7 +3,7 @@ services:
   agents:
     container_name: ddev-${DDEV_PROJECT}-agents
     # Using locally built devcontainer image (built via `ddev build-devcontainer`)
-    image: ddev-agents-devcontainer:latest
+    image: ddev-${DDEV_PROJECT}-devcontainer:latest
     hostname: agents
     user: vscode
     restart: "no"
@@ -39,4 +39,4 @@ services:
 
 volumes:
   copilot-state:
-    name: ddev-agents-copilot-state
+    name: ddev-${DDEV_PROJECT}-copilot-state

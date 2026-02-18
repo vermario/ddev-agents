@@ -117,8 +117,8 @@ ddev copilot --help
 
 -   **devcontainer CLI**: `ddev copilot` uses `devcontainer exec --container-id` to run inside the DDEV-managed container. `--container-id` bypasses devcontainer's own container-discovery (which only finds containers started via `devcontainer up`), while still reading `devcontainer.json` to inject `remoteEnv` — including `GH_TOKEN` from your host's `DDEV_AGENTS_GH_TOKEN`
 -   **Pre-installed**: Copilot CLI is installed via devcontainer feature during container build
--   **Persistent state**: Configuration is stored in a Docker volume (`ddev-agents-copilot-state`)
--   **Shared across projects**: This volume uses a fixed name, so configuration is **shared across all DDEV projects** on the same machine
+-   **Persistent state**: Configuration is stored in a Docker volume (`ddev-${DDEV_PROJECT}-copilot-state`)
+-   **Project-specific state**: Each DDEV project has its own isolated configuration volume
 -   **State survives rebuilds**: Configuration survives container rebuilds (`ddev restart`)
 -   **Authentication**: Uses the `GH_TOKEN` environment variable injected via devcontainer CLI from your host's `DDEV_AGENTS_GH_TOKEN`
 -   **Always up-to-date**: Copilot CLI is reinstalled during container rebuilds to ensure latest version
@@ -153,9 +153,10 @@ winget install Microsoft.DevContainerCLI
 
 ### Resetting Copilot State
 
-To clear all configuration data:
+To clear all configuration data for the current project:
 ```bash
-docker volume rm ddev-agents-copilot-state
+# Replace ${DDEV_PROJECT} with your project name (from .ddev/config.yaml)
+docker volume rm ddev-${DDEV_PROJECT}-copilot-state
 ```
 Copilot will re-initialize on the next run.
 
