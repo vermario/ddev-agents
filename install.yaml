@@ -4,8 +4,11 @@ description: "Standardized AI Agent environment for Wunder.io projects."
 
 project_files:
   - docker-compose.agents.yaml
+  - config.agents.yaml
   - .devcontainer/devcontainer.json
   - commands/host/copilot
+  - commands/host/build-devcontainer
+  - commands/host/claude
   - copilot-managed-config.json
 post_install_actions:
   - rm -rf ../.devcontainer

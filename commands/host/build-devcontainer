@@ -1,0 +1,70 @@
+#!/bin/bash
+
+## Description: Build devcontainer image before DDEV starts
+## Usage: build-devcontainer
+## Example: "ddev build-devcontainer"
+
+set -e
+
+echo "Building devcontainer image..."
+
+# Navigate to project root
+cd "$(dirname "$0")/../../.."
+
+# Get DDEV project name
+DDEV_PROJECT=$(ddev describe -j | jq -r '.raw.name' 2>/dev/null || echo "ddev-agents")
+
+# Check if devcontainer CLI is available
+if ! command -v devcontainer &> /dev/null; then
+    echo "⚠️  devcontainer CLI not found. Installing..."
+    npm install -g @devcontainers/cli
+fi
+
+# Check if we need to skip PHP feature installation
+DEVCONTAINER_CONFIG=".devcontainer/devcontainer.json"
+TEMP_CONFIG=".devcontainer/devcontainer.temp.json"
+PHP_ALREADY_INSTALLED=false
+
+# Extract PHP version from devcontainer.json
+PHP_VERSION=$(jq -r '.features."ghcr.io/devcontainers/features/php:1".version // "none"' "$DEVCONTAINER_CONFIG")
+
+if [ "$PHP_VERSION" != "none" ]; then
+    echo "Checking if PHP $PHP_VERSION is already installed in base image..."
+    
+    # Check if PHP is already installed in the image by running a test container
+    if docker image inspect ddev-${DDEV_PROJECT}-devcontainer:latest >/dev/null 2>&1; then
+        # Image exists, check if PHP is already installed to the correct version
+        INSTALLED_PHP=$(docker run --rm ddev-${DDEV_PROJECT}-devcontainer:latest php -r "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;" 2>/dev/null || echo "none")
+        
+        if [ "$INSTALLED_PHP" = "$PHP_VERSION" ]; then
+            echo "✅ PHP $PHP_VERSION is already installed in the image"
+            PHP_ALREADY_INSTALLED=true
+        else
+            echo "PHP version mismatch: installed=$INSTALLED_PHP, required=$PHP_VERSION"
+        fi
+    else
+        echo "Base image not found, will perform full build"
+    fi
+fi
+
+# If PHP is already installed, create a temporary config without the PHP feature
+if [ "$PHP_ALREADY_INSTALLED" = true ]; then
+    echo "Creating temporary devcontainer config without PHP feature..."
+    jq 'del(.features."ghcr.io/devcontainers/features/php:1")' "$DEVCONTAINER_CONFIG" > "$TEMP_CONFIG"
+    CONFIG_TO_USE="$TEMP_CONFIG"
+else
+    CONFIG_TO_USE="$DEVCONTAINER_CONFIG"
+fi
+
+# Build the devcontainer
+devcontainer build \
+    --workspace-folder . \
+    --image-name ddev-${DDEV_PROJECT}-devcontainer:latest \
+    --config "$CONFIG_TO_USE"
+
+# Clean up temporary config if created
+if [ -f "$TEMP_CONFIG" ]; then
+    rm "$TEMP_CONFIG"
+fi
+
+echo "✅ Devcontainer image built successfully: ddev-${DDEV_PROJECT}-devcontainer:latest"
