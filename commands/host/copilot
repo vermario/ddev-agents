@@ -12,8 +12,13 @@ if ! docker ps --format '{{.Names}}' | grep -q "ddev-${DDEV_PROJECT}-agents"; th
     exit 1
 fi
 
+# Get DDEV project name
+if [ -z "$DDEV_PROJECT" ]; then
+    DDEV_PROJECT=$(ddev describe -j 2>/dev/null | jq -r '.raw.name' 2>/dev/null || echo "ddev-agents")
+fi
+
 # Check if the devcontainer image exists
-if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "ddev-agents-devcontainer:latest"; then
+if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "ddev-${DDEV_PROJECT}-devcontainer:latest"; then
     echo "❌ Error: devcontainer image not built"
     echo "👉 Run 'ddev restart' to build the agents devcontainer"
     exit 1
