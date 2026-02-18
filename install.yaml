@@ -8,7 +8,6 @@ project_files:
   - .devcontainer/devcontainer.json
   - commands/host/copilot
   - commands/host/build-devcontainer
-  - commands/host/claude
   - copilot-managed-config.json
 post_install_actions:
   - rm -rf ../.devcontainer
