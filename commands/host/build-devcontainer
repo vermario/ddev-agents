@@ -25,44 +25,7 @@ if ! command -v devcontainer &> /dev/null; then
     npm install -g @devcontainers/cli
 fi
 
-# Create a temporary build config for the image build
-TEMP_BUILD_CONFIG="$PROJECT_ROOT/.devcontainer/devcontainer.build.json"
-
-echo "Creating build configuration with features..."
-
-# Create build config with Dockerfile and all features
-cat > "$TEMP_BUILD_CONFIG" << 'EOL'
-{
-  "containerEnv": {
-    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
-  },
-  "remoteEnv": {
-    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
-    "SSH_AUTH_SOCK": ""
-  },
-  "name": "Wunder.io Agents Build",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": "."
-  },
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {},
-    "ghcr.io/devcontainers/features/php:1": {
-      "version": "8.4",
-      "installComposer": true
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "installDirectlyFromGitHubRelease": true
-    },
-    "ghcr.io/devcontainers/features/copilot-cli:1": {},
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "configureZshAsDefaultShell": true
-    }
-  }
-}
-EOL
+BUILD_CONFIG="$PROJECT_ROOT/.devcontainer/devcontainer.build.json"
 
 echo "Building with devcontainer CLI (features will be installed)..."
 
@@ -70,12 +33,9 @@ echo "Building with devcontainer CLI (features will be installed)..."
 devcontainer build \
     --workspace-folder "$PROJECT_ROOT" \
     --image-name "ddev-${DDEV_PROJECT}-devcontainer:latest" \
-    --config "$TEMP_BUILD_CONFIG"
+    --config "$BUILD_CONFIG"
 
 BUILD_EXIT_CODE=$?
-
-# Clean up temporary config
-rm -f "$TEMP_BUILD_CONFIG"
 
 if [ $BUILD_EXIT_CODE -ne 0 ]; then
     echo "❌ Devcontainer build failed with exit code $BUILD_EXIT_CODE"

@@ -6,7 +6,7 @@ project_files:
   - docker-compose.agents.yaml
   - config.agents.yaml
   - .devcontainer/devcontainer.json
-  - .devcontainer/Dockerfile
+  - .devcontainer/devcontainer.build.json
   - commands/host/copilot
   - commands/host/build-devcontainer
   - commands/host/set-up
