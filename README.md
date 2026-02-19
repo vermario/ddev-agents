@@ -137,7 +137,7 @@ To fix the issue you need to remove the old images from your system by running t
 **sudo not working inside the container:**
 > `sudo` is intentionally disabled via `no-new-privileges` for security hardening.
 > If you need root access, run from your host terminal:
-> `docker exec -u root -it ddev-<project>-agents bash`
+> `ddev ssh -s agents -u root`
 
 **Troubleshooting for macOS**:
 
