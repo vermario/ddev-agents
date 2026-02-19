@@ -39,7 +39,6 @@ echo "🚀 Running devcontainer up to apply devcontainer metadata and lifecycle 
 # devcontainer up re-uses the already-running container by its ID,
 # applies devcontainer metadata labels, and runs postCreate/postAttach hooks.
 devcontainer set-up \
-    --workspace-folder "$PROJECT_ROOT" \
     --container-id "$CONTAINER_ID"
 
 echo ""
