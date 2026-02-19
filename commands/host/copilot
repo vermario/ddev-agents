@@ -1,5 +1,5 @@
-#ddev-generated
 #!/bin/bash
+#ddev-generated
 
 ## Description: Run GitHub Copilot CLI inside the agents container
 ## Usage: copilot [args]

@@ -1,4 +1,6 @@
 {
+
+  "_comment": "#ddev-generated",
   "tools": {
     "deny": [
       "git push*",
