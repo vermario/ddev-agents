@@ -31,6 +31,7 @@ This add-on is specifically designed and supported for:
 -   **VS Code** (Primary interface)
 -   **Jetbrains IDEs** (PhpStorm, WebStorm etc.)
 -   **Antigravity** (AI Coding Assistant)
+-   **GitHub Copilot CLI** (CLI — via `ddev copilot`)
 
 ### ⚠️ CRITICAL: Connection Check
 **Always verify that your IDE is connected to the Dev Container before running any AI agents.** 
@@ -68,6 +69,101 @@ In PhpStorm:
 -   **Integrated Tools**: Pre-installed Node.js, GH CLI, Git and common utilities.
 -   **GitHub Copilot (Agent Mode)**: Includes the `copilot` CLI extension.
 -   **Secure Authentication**: Uses your host's `DDEV_AGENTS_GH_TOKEN` automatically, so you never have to type credentials inside the container.
+
+## GitHub Copilot CLI — CLI
+
+Run GitHub Copilot CLI directly from your host terminal via `ddev copilot`, with all execution happening inside the isolated agents container.
+
+### Prerequisites
+
+-   An active **GitHub Copilot subscription** (Individual, Business, or Enterprise)
+-   DDEV project with the `ddev-agents` add-on installed
+-   GitHub token set up (see [GitHub Authentication](#github-authentication-recommended-setup))
+-   **devcontainer CLI** on your host machine (see [Installing the devcontainer CLI](#installing-the-devcontainer-cli))
+
+### First-Time Setup
+
+1.  Start the DDEV project:
+    ```bash
+    ddev start
+    ```
+2.  Ensure you have `DDEV_AGENTS_GH_TOKEN` set on your host (see GitHub Authentication section).
+3.  Run Copilot CLI:
+    ```bash
+    ddev copilot
+    ```
+    The CLI will automatically authenticate using your GitHub token.
+4.  Verify by running `/status` in the Copilot REPL.
+
+### Usage
+
+**Interactive mode** (REPL):
+```bash
+ddev copilot
+```
+
+**Headless mode** (single prompt):
+```bash
+ddev copilot -p "explain what this function does"
+```
+
+**Pass any Copilot CLI flags**:
+```bash
+ddev copilot --version
+ddev copilot --help
+```
+
+### How It Works
+
+-   **devcontainer CLI**: `ddev copilot` uses `devcontainer exec --container-id` to run inside the DDEV-managed container. `--container-id` bypasses devcontainer's own container-discovery (which only finds containers started via `devcontainer up`), while still reading `devcontainer.json` to inject `remoteEnv` — including `GH_TOKEN` from your host's `DDEV_AGENTS_GH_TOKEN`
+-   **Pre-installed**: Copilot CLI is installed via devcontainer feature during container build
+-   **Persistent state**: Configuration is stored in a Docker volume (`ddev-${DDEV_PROJECT}-copilot-state`)
+-   **Project-specific state**: Each DDEV project has its own isolated configuration volume
+-   **State survives rebuilds**: Configuration survives container rebuilds (`ddev restart`)
+-   **Authentication**: Uses the `GH_TOKEN` environment variable injected via devcontainer CLI from your host's `DDEV_AGENTS_GH_TOKEN`
+-   **Always up-to-date**: Copilot CLI is reinstalled during container rebuilds to ensure latest version
+
+### Installing the devcontainer CLI
+
+`ddev copilot` requires the [devcontainer CLI](https://github.com/devcontainers/cli) on your host machine. The command will attempt to auto-install it via `npm` on first run, or fall back to `npx` — but for the fastest startup, install it once globally:
+
+**npm (recommended):**
+```bash
+npm install -g @devcontainers/cli
+```
+
+**Homebrew (macOS):**
+```bash
+brew install devcontainer
+```
+
+**Winget (Windows):**
+```bash
+winget install Microsoft.DevContainerCLI
+```
+
+> If you have Node.js / npm but not the CLI, `ddev copilot` will install it automatically on the first run. If `npx` is available but not `npm`, it will use `npx` as a one-shot runner (slower on first invocation). If none of these are present, the command exits with clear instructions.
+
+### Security
+
+-   **Token-based auth**: Uses your GitHub token from the host environment (never stored in the container)
+-   **Managed configuration**: Security restrictions (`copilot-managed-config.json`) are mounted read-only into the container
+-   **Container isolation**: Copilot runs inside the agents container with all security hardening (no capabilities, no privilege escalation)
+-   **Denied operations**: Git destructive operations, publishing packages, SSH access, and reading sensitive files are blocked
+
+### Resetting Copilot State
+
+To clear all configuration data for the current project:
+```bash
+# Replace ${DDEV_PROJECT} with your project name (from .ddev/config.yaml)
+docker volume rm ddev-${DDEV_PROJECT}-copilot-state
+```
+Copilot will re-initialize on the next run.
+
+### Troubleshooting
+
+**Authentication fails:**
+> Ensure `DDEV_AGENTS_GH_TOKEN` is set on your host and includes "Copilot Requests: Read-only" permission. Restart your terminal and run `ddev restart` after setting the token.
 
 ## GitHub Authentication (Recommended Setup)
 

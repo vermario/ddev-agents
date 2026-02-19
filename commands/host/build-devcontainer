@@ -1,0 +1,46 @@
+#ddev-generated
+#!/bin/bash
+
+## Description: Build devcontainer image before DDEV starts
+## Usage: build-devcontainer
+## Example: "ddev build-devcontainer"
+
+set -e
+
+echo "Building devcontainer image..."
+
+# Navigate to project root
+PROJECT_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# Get DDEV project name
+DDEV_PROJECT=$(ddev describe -j | jq -r '.raw.name' 2>/dev/null || echo "ddev-agents")
+
+echo "Project: $DDEV_PROJECT"
+echo "Building image: ddev-${DDEV_PROJECT}-devcontainer:latest"
+
+# Check if devcontainer CLI is available
+if ! command -v devcontainer &> /dev/null; then
+    echo "⚠️  devcontainer CLI not found. Installing..."
+    npm install -g @devcontainers/cli
+fi
+
+BUILD_CONFIG="$PROJECT_ROOT/.devcontainer/devcontainer.build.json"
+
+echo "Building with devcontainer CLI (features will be installed)..."
+
+# Build using devcontainer CLI - this will install all the features
+devcontainer build \
+    --workspace-folder "$PROJECT_ROOT" \
+    --image-name "ddev-${DDEV_PROJECT}-devcontainer:latest" \
+    --config "$BUILD_CONFIG"
+
+BUILD_EXIT_CODE=$?
+
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo "❌ Devcontainer build failed with exit code $BUILD_EXIT_CODE"
+    exit $BUILD_EXIT_CODE
+fi
+
+echo "✅ Devcontainer image built successfully: ddev-${DDEV_PROJECT}-devcontainer:latest"
+echo "   VS Code will attach to this pre-built image via docker-compose"

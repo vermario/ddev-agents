@@ -1,0 +1,27 @@
+{
+  "containerEnv": {
+    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
+  },
+  "remoteEnv": {
+    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
+    "SSH_AUTH_SOCK": ""
+  },
+  "name": "Wunder.io Agents Build",
+  "image": "mcr.microsoft.com/devcontainers/python:3-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/php:1": {
+      "version": "8.4",
+      "installComposer": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true
+    },
+    "ghcr.io/devcontainers/features/copilot-cli:1": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true
+    }
+  }
+}
