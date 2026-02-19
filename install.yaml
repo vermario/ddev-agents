@@ -9,6 +9,7 @@ project_files:
   - .devcontainer/Dockerfile
   - commands/host/copilot
   - commands/host/build-devcontainer
+  - commands/host/set-up
   - copilot-managed-config.json
 post_install_actions:
   - rm -rf ../.devcontainer

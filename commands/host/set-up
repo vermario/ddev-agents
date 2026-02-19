@@ -40,7 +40,6 @@ echo "🚀 Running devcontainer up to apply devcontainer metadata and lifecycle 
 # applies devcontainer metadata labels, and runs postCreate/postAttach hooks.
 devcontainer up \
     --workspace-folder "$PROJECT_ROOT" \
-    --config "$PROJECT_ROOT/.devcontainer/devcontainer.json" \
     --container-id "$CONTAINER_ID"
 
 echo ""
