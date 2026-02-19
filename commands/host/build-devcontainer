@@ -9,10 +9,14 @@ set -e
 echo "Building devcontainer image..."
 
 # Navigate to project root
-cd "$(dirname "$0")/../../.."
+PROJECT_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+cd "$PROJECT_ROOT"
 
 # Get DDEV project name
 DDEV_PROJECT=$(ddev describe -j | jq -r '.raw.name' 2>/dev/null || echo "ddev-agents")
+
+echo "Project: $DDEV_PROJECT"
+echo "Building image: ddev-${DDEV_PROJECT}-devcontainer:latest"
 
 # Check if devcontainer CLI is available
 if ! command -v devcontainer &> /dev/null; then
@@ -20,51 +24,63 @@ if ! command -v devcontainer &> /dev/null; then
     npm install -g @devcontainers/cli
 fi
 
-# Check if we need to skip PHP feature installation
-DEVCONTAINER_CONFIG=".devcontainer/devcontainer.json"
-TEMP_CONFIG=".devcontainer/devcontainer.temp.json"
-PHP_ALREADY_INSTALLED=false
+# Create a temporary build config for the image build
+TEMP_BUILD_CONFIG="$PROJECT_ROOT/.devcontainer/devcontainer.build.json"
 
-# Extract PHP version from devcontainer.json
-PHP_VERSION=$(jq -r '.features."ghcr.io/devcontainers/features/php:1".version // "none"' "$DEVCONTAINER_CONFIG")
+echo "Creating build configuration with features..."
 
-if [ "$PHP_VERSION" != "none" ]; then
-    echo "Checking if PHP $PHP_VERSION is already installed in base image..."
-    
-    # Check if PHP is already installed in the image by running a test container
-    if docker image inspect ddev-${DDEV_PROJECT}-devcontainer:latest >/dev/null 2>&1; then
-        # Image exists, check if PHP is already installed to the correct version
-        INSTALLED_PHP=$(docker run --rm ddev-${DDEV_PROJECT}-devcontainer:latest php -r "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;" 2>/dev/null || echo "none")
-        
-        if [ "$INSTALLED_PHP" = "$PHP_VERSION" ]; then
-            echo "✅ PHP $PHP_VERSION is already installed in the image"
-            PHP_ALREADY_INSTALLED=true
-        else
-            echo "PHP version mismatch: installed=$INSTALLED_PHP, required=$PHP_VERSION"
-        fi
-    else
-        echo "Base image not found, will perform full build"
-    fi
-fi
+# Create build config with Dockerfile and all features
+cat > "$TEMP_BUILD_CONFIG" << 'EOL'
+{
+  {
+  "containerEnv": {
+    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
+  },
+  "remoteEnv": {
+    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
+    "SSH_AUTH_SOCK": ""
+  },
+  "name": "Wunder.io Agents Build",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/php:1": {
+      "version": "8.4",
+      "installComposer": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true
+    },
+    "ghcr.io/devcontainers/features/copilot-cli:1": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true
+    }
+  }
+}
+EOL
 
-# If PHP is already installed, create a temporary config without the PHP feature
-if [ "$PHP_ALREADY_INSTALLED" = true ]; then
-    echo "Creating temporary devcontainer config without PHP feature..."
-    jq 'del(.features."ghcr.io/devcontainers/features/php:1")' "$DEVCONTAINER_CONFIG" > "$TEMP_CONFIG"
-    CONFIG_TO_USE="$TEMP_CONFIG"
-else
-    CONFIG_TO_USE="$DEVCONTAINER_CONFIG"
-fi
+echo "Building with devcontainer CLI (features will be installed)..."
 
-# Build the devcontainer
+# Build using devcontainer CLI - this will install all the features
 devcontainer build \
-    --workspace-folder . \
-    --image-name ddev-${DDEV_PROJECT}-devcontainer:latest \
-    --config "$CONFIG_TO_USE"
+    --workspace-folder "$PROJECT_ROOT" \
+    --image-name "ddev-${DDEV_PROJECT}-devcontainer:latest" \
+    --config "$TEMP_BUILD_CONFIG"
 
-# Clean up temporary config if created
-if [ -f "$TEMP_CONFIG" ]; then
-    rm "$TEMP_CONFIG"
+BUILD_EXIT_CODE=$?
+
+# Clean up temporary config
+rm -f "$TEMP_BUILD_CONFIG"
+
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo "❌ Devcontainer build failed with exit code $BUILD_EXIT_CODE"
+    exit $BUILD_EXIT_CODE
 fi
 
 echo "✅ Devcontainer image built successfully: ddev-${DDEV_PROJECT}-devcontainer:latest"
+echo "   VS Code will attach to this pre-built image via docker-compose"
