@@ -1,3 +1,4 @@
+#ddev-generated
 #!/bin/bash
 
 ## Description: Build devcontainer image before DDEV starts
@@ -32,7 +33,6 @@ echo "Creating build configuration with features..."
 # Create build config with Dockerfile and all features
 cat > "$TEMP_BUILD_CONFIG" << 'EOL'
 {
-  {
   "containerEnv": {
     "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
   },

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+## Description: Set up devcontainer after DDEV starts (makes the agents container a real devcontainer)
+## Usage: set-up
+## Example: "ddev set-up"
+
+set -e
+
+# Resolve project root from this script's location (commands/host/)
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# Determine project name
+if [ -z "$DDEV_PROJECT" ]; then
+    DDEV_PROJECT=$(ddev describe -j 2>/dev/null | jq -r '.raw.name' 2>/dev/null || echo "ddev-agents")
+fi
+
+AGENTS_CONTAINER="ddev-${DDEV_PROJECT}-agents"
+
+echo "🔍 Project: $DDEV_PROJECT"
+
+# Verify DDEV is running
+if ! docker ps --format '{{.Names}}' | grep -q "^${AGENTS_CONTAINER}$"; then
+    echo "❌ agents container not running. Run 'ddev start' first."
+    exit 1
+fi
+
+CONTAINER_ID=$(docker inspect --format '{{.Id}}' "$AGENTS_CONTAINER")
+echo "✅ DDEV is running — agents container ID: $CONTAINER_ID"
+
+# Ensure devcontainer CLI is available
+if ! command -v devcontainer &>/dev/null; then
+    echo "⚠️  devcontainer CLI not found. Installing..."
+    npm install -g @devcontainers/cli
+fi
+
+echo "🚀 Running devcontainer up to apply devcontainer metadata and lifecycle commands..."
+
+# devcontainer up re-uses the already-running container by its ID,
+# applies devcontainer metadata labels, and runs postCreate/postAttach hooks.
+devcontainer up \
+    --workspace-folder "$PROJECT_ROOT" \
+    --config "$PROJECT_ROOT/.devcontainer/devcontainer.json" \
+    --container-id "$CONTAINER_ID"
+
+echo ""
+echo "✅ Devcontainer is ready."
+echo "   Open this folder in VS Code and select 'Reopen in Container' to attach."
+

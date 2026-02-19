@@ -5,3 +5,6 @@
 hooks:
   pre-start:
     - exec-host: .ddev/commands/host/build-devcontainer
+
+  post-start:
+    - exec-host: .ddev/commands/host/set-up
