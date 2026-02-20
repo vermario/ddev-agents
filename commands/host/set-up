@@ -6,8 +6,8 @@
 
 set -e
 
-# Resolve project root from this script's location (commands/host/)
-PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# Resolve project root from this script's location (.ddev/commands/host/)
+PROJECT_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # Determine project name
@@ -26,7 +26,33 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${AGENTS_CONTAINER}$"; then
 fi
 
 CONTAINER_ID=$(docker inspect --format '{{.Id}}' "$AGENTS_CONTAINER")
-echo "✅ DDEV is running — agents container ID: $CONTAINER_ID"
+echo "✅ Agents container found: ${CONTAINER_ID:0:12}"
+
+# ==============================================================================
+# Resolve version placeholders in devcontainer.json
+# ==============================================================================
+DDEV_CONFIG="$PROJECT_ROOT/.ddev/config.yaml"
+PHP_VERSION=""
+NODE_VERSION=""
+
+if [ -f "$DDEV_CONFIG" ]; then
+    PHP_VERSION=$(grep -E '^\s*php_version:' "$DDEV_CONFIG" | sed -E 's/.*php_version:[[:space:]]*"?([^"]*)"?/\1/' | xargs)
+    NODE_VERSION=$(grep -E '^\s*nodejs_version:' "$DDEV_CONFIG" | sed -E 's/.*nodejs_version:[[:space:]]*"?([^"]*)"?/\1/' | xargs)
+fi
+
+PHP_VERSION="${PHP_VERSION:-8.3}"
+NODE_VERSION="${NODE_VERSION:-22}"
+
+DEVCONTAINER_JSON="$PROJECT_ROOT/.devcontainer/devcontainer.json"
+if [ -f "$DEVCONTAINER_JSON" ] && grep -q "__PHP_VERSION__\|__NODE_VERSION__\|__PROJECT_NAME__" "$DEVCONTAINER_JSON"; then
+    echo "📍 Resolving devcontainer.json: PHP $PHP_VERSION, Node $NODE_VERSION"
+    sed -i.bak \
+        -e "s|__PHP_VERSION__|${PHP_VERSION}|g" \
+        -e "s|__NODE_VERSION__|${NODE_VERSION}|g" \
+        -e "s|__PROJECT_NAME__|${DDEV_PROJECT}|g" \
+        "$DEVCONTAINER_JSON"
+    rm -f "${DEVCONTAINER_JSON}.bak"
+fi
 
 # Ensure devcontainer CLI is available
 if ! command -v devcontainer &>/dev/null; then
