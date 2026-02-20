@@ -57,18 +57,33 @@ tools:
     type: command
     enabled: true
     description: "What this tool does"
-    command_template: "my_command {arg1}"
+    command_template: "my_command {command} {args}"
     ssh_target: "web"
     working_dir: "/var/www/html"
+    default_args:
+      args: []
     input_schema:
       type: object
       properties:
-        arg1:
+        command:
           type: string
-          description: "Argument description"
+          description: "Command to run"
+        args:
+          type: array
+          items:
+            type: string
+          description: "Flags and options, each as a separate array element"
       required:
-        - arg1
+        - command
 ```
+
+### Parameter types
+
+- **`string`** — for single values (commands, package names, file paths).
+- **`array`** with `items: { type: string }` — for flags/options. Each element is individually shell-escaped, so multi-flag use is safe: `["--format=json", "--fields=name,status"]`.
+- **`integer`** — for numeric values (line counts, limits).
+
+String parameters are shell-escaped as a single token. Array parameters have each element escaped individually and joined with spaces. Empty strings and empty arrays produce no output in the rendered command.
 
 ## Project `.env` Credentials
 
@@ -86,7 +101,7 @@ This file is preserved across addon reinstalls (non-destructive merge).
 ## Available Tool Types
 
 - `command` – Run shell commands with parameter substitution
-- `mcp_server` – Proxy to additional internal MCP servers
+- `mcp_server` – Proxy to additional MCP servers
 
 ### Command Tool Type
 
@@ -100,27 +115,34 @@ tools:
     type: command
     enabled: true
     description: "Execute a custom command"
-    command_template: "my_command {arg1}"
+    command_template: "my_command {name} {args}"
     ssh_target: "web"
     working_dir: "/var/www/html"
+    default_args:
+      args: []
 
     input_schema:
       type: object
       properties:
-        arg1:
+        name:
           type: string
+          description: "Name argument"
+        args:
+          type: array
+          items:
+            type: string
+          description: "Flags and options as separate array elements"
       required:
-        - arg1
+        - name
 ```
 
 ### MCP Server Tool Type
 
-MCP Server tools proxy requests to other MCP servers via HTTP. This allows the Python MCP server to act as a gateway to other specialized MCP servers.
-Both plain JSON-RPC HTTP endpoints and Streamable HTTP MCP endpoints are supported.
+MCP Server tools proxy requests to other MCP servers via HTTP. Both plain JSON-RPC HTTP endpoints and Streamable HTTP MCP endpoints are supported.
+
+For Streamable HTTP MCP endpoints, the proxy uses the MCP SDK Client which handles the protocol handshake, session management, and reconnection automatically. If the remote server does not support the MCP protocol, the proxy falls back to plain JSON-RPC.
 
 **Dynamic Tool Discovery:** When `expose_remote_tools: true` is set, the proxy will query the remote MCP server for all its available tools and expose them as if they were local tools. This allows seamless integration with external MCP servers.
-
-For Streamable HTTP MCP endpoints, the proxy performs the MCP init handshake (`initialize` + `notifications/initialized`) and keeps the session id automatically.
 
 Example (single proxy tool):
 
@@ -133,8 +155,8 @@ tools:
     server_url: "http://localhost:8080/endpoint"
     forward_args: true       # Optional: forward arguments (default: true)
     timeout: 30              # Optional: timeout in seconds (default: 30)
-    auth_username: "${DRUPAL_MCP_USER}"    # Optional: basic auth username
-    auth_password: "${DRUPAL_MCP_PASS}"    # Optional: basic auth password
+    auth_username: "${MCP_USER}"     # Optional: basic auth username
+    auth_password: "${MCP_PASS}"     # Optional: basic auth password
     input_schema:
       type: object
       properties:

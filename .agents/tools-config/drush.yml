@@ -9,21 +9,35 @@ tools:
 
       Best practice: Always check site status before operations.
 
-      IMPORTANT: NEVER use --db-url parameter. Drush automatically uses the
-      database connection from Drupal's settings.php, which is already properly
-      configured via environment variables (DB_HOST, DB_NAME, DB_USER, DB_PASS).
-      Adding --db-url will break this auto-configuration and cause SSL/TLS errors.
+      USAGE CONTRACT:
+      - "command" must be a bare Drush command name only (no flags, no operands).
+      - "args" is a string array; each flag or operand is one element.
+      - Operands (module names, entity IDs, etc.) go in args, not command.
 
-      Why --db-url fails:
-      - It bypasses Drupal's configured database settings
-      - PDO enforces SSL/TLS verification by default
-      - DDEV's MariaDB doesn't have SSL enabled
+      VALID examples:
+      - {"command": "status"}
+      - {"command": "core:status", "args": ["--format=json"]}
+      - {"command": "pm:list", "args": ["--fields=name,status", "--format=json"]}
+      - {"command": "pm:enable", "args": ["mcp", "-y"]}
+      - {"command": "config:get", "args": ["system.site"]}
 
-      For database operations like site-install or sql-drop, use the specialized
-      "drush_sql_drop" and "drush_site_install" tools instead.
+      INVALID examples (will fail):
+      - {"command": "status --format=json"} — flags must go in args
+      - {"command": "en mcp"} — operands must go in args
+      - {"args": "--format=json"} — args must be an array, not a string
 
-      For running PHP code, use the "php_exec" tool instead of drush eval/php-eval
-      (which have escaping and parsing issues).
+      BLOCKED commands (use dedicated tools instead):
+      - cr / cache-rebuild → use "drush_cr" tool
+      - sql-drop → use "drush_sql_drop" tool
+      - site-install → use "drush_site_install" tool
+      - sql-sync → not permitted
+
+      NEVER use --db-url. Drush auto-configures the database connection from
+      Drupal's settings.php via environment variables. Adding --db-url bypasses
+      this and causes SSL/TLS errors.
+
+      For running PHP code, use the "drush_php_eval" tool instead of drush
+      eval/php-eval (which have escaping and parsing issues).
 
     type: command
     command_template: "vendor/bin/drush {command} {args}"
@@ -32,30 +46,33 @@ tools:
     working_dir: "/var/www/html"
 
     default_args:
-      args: ""
+      args: []
 
-    # Blacklist: disallowed commands and patterns
+    # Blocked commands with suggested alternatives
     disallowed_commands:
-      - sql-sync
-      - site-install
-      - sql-drop
-      - cr
-      - cache-rebuild
+      - pattern: sql-sync
+      - pattern: site-install
+        suggested_tool: drush_site_install
+      - pattern: sql-drop
+        suggested_tool: drush_sql_drop
+      - pattern: cr
+        suggested_tool: drush_cr
+      - pattern: cache-rebuild
+        suggested_tool: drush_cr
 
-    # Validate arguments to prevent --db-url usage and flags in command
+    # Validate arguments
     validation_rules:
+      - field: command
+        pattern: "\\s"
+        message: >
+          Invalid command: must be a bare Drush command name with no spaces.
+          Put flags and operands in the args array instead.
+          Valid: {"command": "pm:enable", "args": ["mcp", "-y"]}.
+          Invalid: {"command": "en mcp"}.
       - pattern: "--db-url"
-        message: |
-          ERROR: --db-url is not permitted. Drush is already auto-configured
-          to use the database connection from Drupal's settings.php.
-
-          Adding --db-url breaks this auto-configuration and causes SSL errors:
-          - It bypasses Drupal's configured database settings
-          - PDO enforces SSL/TLS verification by default
-          - DDEV's MariaDB doesn't have SSL enabled
-
-          Solution: Remove --db-url from your command
-          Example: drush cr (for cache rebuild)
+        message: >
+          --db-url is not permitted. Drush auto-configures the database connection
+          from settings.php. Adding --db-url causes SSL/TLS errors.
 
     input_schema:
       type: object
@@ -63,16 +80,16 @@ tools:
         command:
           type: string
           description: >
-            Drush command name ONLY — no flags, no options, no extra spaces.
-            Examples: "status", "core:status", "pm:list", "en module_name".
-            Put all flags/options in the args array instead.
+            Drush command name ONLY — no flags, no operands, no spaces.
+            Valid: "status", "core:status", "pm:list", "pm:enable", "config:get".
+            Invalid: "status --format=json", "en mcp".
         args:
           type: array
           items:
             type: string
           description: >
-            Each flag or option as a separate array element.
-            Examples: ["--format=json"], ["--fields=bootstrap,db-status", "--format=list"].
+            Each flag, option, or operand as a separate array element.
+            Valid: ["--format=json"], ["mcp", "-y"], ["--fields=name,status", "--format=list"].
             DO NOT use --db-url.
       required:
         - command
