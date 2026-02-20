@@ -16,6 +16,7 @@ if [ -z "$DDEV_PROJECT" ]; then
 fi
 
 AGENTS_CONTAINER="ddev-${DDEV_PROJECT}-agents"
+WEB_CONTAINER="ddev-${DDEV_PROJECT}-web"
 
 echo "🔍 Project: $DDEV_PROJECT"
 
