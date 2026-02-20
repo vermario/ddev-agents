@@ -147,3 +147,12 @@ SSHCONFIG
         fi
     fi
 fi
+
+# ==============================================================================
+# Copy MCP config to .vscode/
+# ==============================================================================
+if [ -f "$PROJECT_ROOT/.agents/mcp.json" ]; then
+    mkdir -p "$PROJECT_ROOT/.vscode"
+    cp "$PROJECT_ROOT/.agents/mcp.json" "$PROJECT_ROOT/.vscode/mcp.json"
+    echo "✅ MCP config copied to .vscode/mcp.json"
+fi
