@@ -1,0 +1,62 @@
+# Drupal MCP Server Proxy Configuration
+# Proxies to a Drupal-specific MCP server
+#
+# MCP Server Configuration Reference:
+# {
+#     "mcpServers": {
+#         "drupal-mcp": {
+#             "url": "https://drupal-project.ddev.site/mcp/post",
+#             "auth": {
+#                 "type": "basic",
+#                 "username": "your-drupal-username",
+#                 "password": "your-drupal-password"
+#             }
+#         }
+#     }
+# }
+
+tools:
+  - name: drupal
+    enabled: true
+    type: mcp_server
+    description: |
+      Drupal MCP server proxy for accessing tools provided by the Drupal site.
+
+      This proxies requests to the Drupal site's /mcp/post endpoint to discover
+      and call available tools. Discovered tools are prefixed with "drupal_"
+      (e.g., drupal_general_info).
+
+      Usage:
+      - Use discovered tools directly (e.g., drupal_general_info, drupal_entity_info)
+      - Each discovered tool is automatically prefixed
+
+    # Drupal MCP server endpoint - uses internal DDEV network address
+    server_url: "http://web/mcp/post"
+
+    # Basic authentication (if required by Drupal module)
+    auth_username: "${DRUPAL_MCP_USER}"
+    auth_password: "${DRUPAL_MCP_PASS}"
+
+    # Dynamically expose all tools from the remote MCP server
+    # Tools are automatically prefixed with the tool name: drupal_<tool_name>
+    expose_remote_tools: true
+
+    # Initialization timeout for fetching remote tools (seconds)
+    # Drupal MCP server can be slow, so allow enough time during startup
+    init_timeout: 60
+
+    # Request timeout in seconds (for runtime tool execution)
+    timeout: 60
+
+    # Input schema for JSON-RPC method calls
+    input_schema:
+      type: object
+      properties:
+        method:
+          type: string
+          description: "JSON-RPC method name (e.g., 'tools/list', 'tools/call')"
+        params:
+          type: object
+          description: "Method parameters (varies by method)"
+      required:
+        - method
