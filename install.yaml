@@ -11,6 +11,7 @@ project_files:
   - commands/host/build-devcontainer
   - commands/host/set-up
   - copilot-managed-config.json
+  - web-build
 post_install_actions:
   - rm -rf ../.devcontainer
   - mv .devcontainer ..
