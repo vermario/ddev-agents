@@ -61,16 +61,15 @@ if ! command -v devcontainer &>/dev/null; then
     npm install -g @devcontainers/cli
 fi
 
-echo "🚀 Running devcontainer up to apply devcontainer metadata and lifecycle commands..."
+echo "🚀 Running devcontainer set-up to apply devcontainer metadata and lifecycle commands..."
 
-# devcontainer up re-uses the already-running container by its ID,
+# devcontainer set-up re-uses the already-running container by its ID,
 # applies devcontainer metadata labels, and runs postCreate/postAttach hooks.
 devcontainer set-up \
     --container-id "$CONTAINER_ID"
 
 echo ""
 echo "✅ Devcontainer is ready."
-echo "   Open this folder in VS Code and select 'Reopen in Container' to attach."
 
 # ==============================================================================
 # SSH key generation and distribution (ephemeral)
@@ -157,3 +156,6 @@ if [ -f "$PROJECT_ROOT/.agents/mcp.json" ]; then
     cp "$PROJECT_ROOT/.agents/mcp.json" "$PROJECT_ROOT/.vscode/mcp.json"
     echo "✅ MCP config copied to .vscode/mcp.json"
 fi
+
+echo ""
+echo "✅ Setup complete. Open VS Code and select 'Reopen in Container' to attach."
