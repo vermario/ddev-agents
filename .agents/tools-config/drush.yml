@@ -211,8 +211,14 @@ tools:
 
       DO NOT use for:
       - Operations available via drush (use drush instead)
-      - Complex multi-statement code (create a file instead)
       - Database operations (use drush sql-* or create proper migrations)
+
+      CODE SIZE LIMIT: 16 384 characters max. If your code is longer, use
+      "drush_php_script" instead — write the code to a file and execute it.
+
+      PATH NORMALIZATION: File paths in your code must use /var/www/html/ (the
+      container path), not /workspace/. The devcontainer's /workspace/ is bind-
+      mounted to /var/www/html/ inside the web container where Drush runs.
 
       The code runs in the context of a bootstrapped Drupal site with all APIs available.
 
@@ -226,6 +232,7 @@ tools:
     ssh_target: "web"
     ssh_user: "${DDEV_SSH_USER}"
     working_dir: "/var/www/html"
+    max_arg_length: 16384
 
     input_schema:
       type: object
@@ -235,7 +242,58 @@ tools:
           description: |
             PHP code to execute (without <?php tags).
             Use single quotes in the code, as double quotes may cause issues.
-            Keep it simple - one or two statements max.
-            For complex code, create a .php file instead.
+            Max 16 384 characters — use drush_php_script for longer code.
       required:
         - code
+
+  - name: drush_php_script
+    enabled: true
+    description: |
+      Execute a PHP script file with full Drupal bootstrap context.
+
+      Use this instead of drush_php_eval when:
+      - Code exceeds the 16 384-character eval limit
+      - You need multi-file or complex logic
+      - You want to iterate on a script without re-sending the full code
+
+      PATH NORMALIZATION: The script must exist inside /var/www/html/ on the
+      web container. The devcontainer's /workspace/ is bind-mounted to
+      /var/www/html/, so a file you create at /workspace/scripts/foo.php
+      should be referenced as scripts/foo.php (relative) or
+      /var/www/html/scripts/foo.php (absolute).
+
+      EXTRA ARGUMENTS: Any values in "args" are available inside the script via
+      the $extra variable (a string of all arguments joined by spaces). You can
+      also access them via drush_get_arguments() or the $extra convention
+      documented in `drush topic docs:script`.
+
+      Examples:
+      - Run a script: {"script_path": "scripts/migrate.php"}
+      - With args:    {"script_path": "scripts/fix.php", "args": ["--force", "node"]}
+
+    type: command
+    command_template: "vendor/bin/drush php:script {script_path} {args}"
+    ssh_target: "web"
+    ssh_user: "${DDEV_SSH_USER}"
+    working_dir: "/var/www/html"
+
+    default_args:
+      args: []
+
+    input_schema:
+      type: object
+      properties:
+        script_path:
+          type: string
+          description: |
+            Path to the PHP script file (without <?php tags in the file is fine —
+            Drush handles it). Relative paths resolve from /var/www/html/.
+        args:
+          type: array
+          items:
+            type: string
+          description: |
+            Extra arguments passed to the script. Available in the script as
+            the $extra variable. Each element is shell-escaped separately.
+      required:
+        - script_path
