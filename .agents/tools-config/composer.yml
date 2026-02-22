@@ -66,10 +66,18 @@ tools:
   - name: composer_require
     enabled: true
     description: |
-      Add a new dependency to composer.json.
+      Add one or more dependencies to composer.json.
 
       Always run in the Drupal project directory (/var/www/html).
-      Adds a package and updates composer.lock.
+      Adds packages and updates composer.lock.
+
+      Supports multiple packages in a single call — prefer this over separate
+      calls when installing related packages together:
+        {"packages": ["drupal/pathauto", "drupal/token:^1.0"]}
+        {"packages": ["drupal/mcp_server", "drupal/tool"], "args": ["--ignore-platform-req=ext-gd"]}
+
+      Single package still works:
+        {"packages": ["drupal/pathauto"]}
 
       Troubleshooting installation failures:
 
@@ -79,7 +87,7 @@ tools:
          - Try: args: ["--ignore-platform-req=php-ext-*"]
 
       2. **Stability Constraints** - Package below minimum-stability threshold
-         - Try: package: "drupal/package:@dev" (or @beta, @alpha)
+         - Try: packages: ["drupal/package:@dev"] (or @beta, @alpha)
          - Or update composer.json "minimum-stability" to "dev"
 
       3. **Memory Errors** - Large installation can exceed PHP memory limit
@@ -90,7 +98,7 @@ tools:
          - This updates related packages to compatible versions
 
     type: command
-    command_template: "composer require {package} {args}"
+    command_template: "composer require {packages} {args}"
     ssh_target: "web"
     ssh_user: "${DDEV_SSH_USER}"
     working_dir: "/var/www/html"
@@ -100,10 +108,14 @@ tools:
     input_schema:
       type: object
       properties:
-        package:
-          type: string
+        packages:
+          type: array
+          items:
+            type: string
           description: >
-            Package name to require (e.g., "drupal/pathauto", "drupal/token:^1.0").
+            One or more package names to require.
+            Examples: ["drupal/pathauto"], ["drupal/mcp_server", "drupal/tool:^1.0"].
+            Each element is shell-escaped and joined with spaces in the command.
         args:
           type: array
           items:
@@ -112,4 +124,4 @@ tools:
             Each flag or option as a separate array element.
             Examples: ["--with-all-dependencies"], ["--no-dev", "--prefer-dist"].
       required:
-        - package
+        - packages
