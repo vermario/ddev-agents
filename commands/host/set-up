@@ -157,5 +157,26 @@ if [ -f "$PROJECT_ROOT/.agents/mcp.json" ]; then
     echo "✅ MCP config copied to .vscode/mcp.json"
 fi
 
+# ==============================================================================
+# Generate Copilot CLI MCP config
+# ==============================================================================
+if [ -f "$PROJECT_ROOT/.agents/mcp.json" ]; then
+    docker exec -i -u vscode "$AGENTS_CONTAINER" bash -c 'mkdir -p ~/.copilot && cat > ~/.copilot/mcp-config.json' <<MCPCONFIG
+{
+  "mcpServers": {
+    "wdrmcp": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "set -a; export DDEV_SSH_USER=${DDEV_USER:-}; [ -f /workspace/.env ] && source /workspace/.env; exec npx -y @wunderio/wdrmcp --tools-config /workspace/.agents/tools-config"
+      ],
+      "tools": ["*"]
+    }
+  }
+}
+MCPCONFIG
+    echo "✅ MCP config generated for Copilot CLI (~/.copilot/mcp-config.json)"
+fi
+
 echo ""
 echo "✅ Setup complete. Open VS Code and select 'Reopen in Container' to attach."
