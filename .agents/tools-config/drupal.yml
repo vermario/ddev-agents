@@ -1,19 +1,31 @@
 # Drupal MCP Server Proxy Configuration
 # Proxies to a Drupal-specific MCP server
 #
-# MCP Server Configuration Reference:
-# {
-#     "mcpServers": {
-#         "drupal-mcp": {
-#             "url": "https://drupal-project.ddev.site/mcp/post",
-#             "auth": {
-#                 "type": "basic",
-#                 "username": "your-drupal-username",
-#                 "password": "your-drupal-password"
-#             }
-#         }
-#     }
-# }
+# == SETUP INSTRUCTIONS (run once per project) ==
+#
+# 1. Install and enable the module:
+#      composer_require: drupal/mcp
+#      drush pm:enable mcp -y
+#      drush_cr
+#
+# 2. Enable basic auth:
+#      drush config:set mcp.settings enable_auth true -y
+#      drush config:set mcp.settings auth_settings.enable_basic_auth true -y
+#
+# 3. Verify — expect a JSON-RPC response containing "protocolVersion":
+#      drush_php_eval:
+#        $req = \Symfony\Component\HttpFoundation\Request::create('/mcp/post','POST',[],[],[],
+#          ['HTTP_AUTHORIZATION'=>'Basic '.base64_encode('admin:admin'),'CONTENT_TYPE'=>'application/json'],
+#          json_encode(['jsonrpc'=>'2.0','method'=>'initialize','params'=>['protocolVersion'=>'2024-11-05','capabilities'=>[],'clientInfo'=>['name'=>'test','version'=>'1.0']],'id'=>1]));
+#        echo \Drupal::classResolver(\Drupal\mcp\Controller\McpController::class)->post($req)->getContent();
+#
+# 4. Ask the user for the Drupal admin username and password, then create
+#    .agents/tools-config/.env:
+#      DRUPAL_MCP_USER=<username>
+#      DRUPAL_MCP_PASS=<password>
+#
+# NOTE: Use http://web/mcp/post (internal container URL — bypasses Varnish).
+#       The tool config below already references this URL and the env vars above.
 
 tools:
   - name: drupal
