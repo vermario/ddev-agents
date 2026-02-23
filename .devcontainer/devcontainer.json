@@ -47,7 +47,9 @@
         "github.copilot.enable": {
           "*": true
         },
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "chat.mcp.gallery.enabled": true,
+        "chat.mcp.gallery.serviceUrl": "https://mcp.wdr.io"
       }
     },
     "jetbrains": {
