@@ -1,6 +1,10 @@
 #ddev-generated
 # Install and configure SSH server for remote command execution from agents container
 
+# Ensure signing key is up to date
+RUN curl -sSL https://packages.sury.org/php/apt.gpg | gpg --dearmor --batch --yes -o /usr/share/keyrings/deb.sury.org-php.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
+
 # Install SSH server
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
