@@ -3,7 +3,8 @@
     "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
   },
   "remoteEnv": {
-    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
+    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
+    "SSH_AUTH_SOCK": ""
   },
   "name": "Agents: __PROJECT_NAME__",
   "dockerComposeFile": [
