@@ -11,9 +11,14 @@ project_files:
   - commands/host/build-devcontainer
   - commands/host/set-up
   - copilot-managed-config.json
+  - .agents
+  - web-build
 post_install_actions:
   - rm -rf ../.devcontainer
   - mv .devcontainer ..
+  - mkdir -p ../.agents
+  - cp -a .agents/. ../.agents/
+  - rm -rf .agents
   - echo "🚀 DDEV Agents installed."
   - echo "👉 Run 'ddev restart' to build the Agents container."
   - echo "👉 Then reopen VS Code in the Container."

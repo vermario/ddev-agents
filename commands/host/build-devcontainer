@@ -7,7 +7,7 @@
 
 set -e
 
-echo "Building devcontainer image..."
+echo "🔨 Building devcontainer image..."
 
 # Navigate to project root
 PROJECT_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
@@ -16,8 +16,8 @@ cd "$PROJECT_ROOT"
 # Get DDEV project name
 DDEV_PROJECT=$(ddev describe -j | jq -r '.raw.name' 2>/dev/null || echo "ddev-agents")
 
-echo "Project: $DDEV_PROJECT"
-echo "Building image: ddev-${DDEV_PROJECT}-devcontainer:latest"
+echo "🔍 Project: $DDEV_PROJECT"
+echo "🔨 Building image: ddev-${DDEV_PROJECT}-devcontainer:latest"
 
 # Check if devcontainer CLI is available
 if ! command -v devcontainer &> /dev/null; then
@@ -25,9 +25,34 @@ if ! command -v devcontainer &> /dev/null; then
     npm install -g @devcontainers/cli
 fi
 
-BUILD_CONFIG="$PROJECT_ROOT/.devcontainer/devcontainer.build.json"
+# ==============================================================================
+# Resolve version placeholders from .ddev/config.yaml
+# ==============================================================================
+DDEV_CONFIG="$PROJECT_ROOT/.ddev/config.yaml"
+PHP_VERSION=""
+NODE_VERSION=""
 
-echo "Building with devcontainer CLI (features will be installed)..."
+if [ -f "$DDEV_CONFIG" ]; then
+    PHP_VERSION=$(grep -E '^\s*php_version:' "$DDEV_CONFIG" | sed -E 's/.*php_version:[[:space:]]*"?([^"]*)"?/\1/' | xargs)
+    NODE_VERSION=$(grep -E '^\s*nodejs_version:' "$DDEV_CONFIG" | sed -E 's/.*nodejs_version:[[:space:]]*"?([^"]*)"?/\1/' | xargs)
+fi
+
+# Defaults if not found
+PHP_VERSION="${PHP_VERSION:-8.3}"
+NODE_VERSION="${NODE_VERSION:-22}"
+
+echo "📍 PHP version: $PHP_VERSION"
+echo "📍 Node.js version: $NODE_VERSION"
+
+# Create a temp copy of build config with resolved placeholders
+BUILD_CONFIG_TEMPLATE="$PROJECT_ROOT/.devcontainer/devcontainer.build.json"
+BUILD_CONFIG=$(mktemp "${TMPDIR:-/tmp}/devcontainer-build-XXXXXX.json")
+sed -e "s|__PHP_VERSION__|${PHP_VERSION}|g" \
+    -e "s|__NODE_VERSION__|${NODE_VERSION}|g" \
+    -e "s|__PROJECT_NAME__|${DDEV_PROJECT}|g" \
+    "$BUILD_CONFIG_TEMPLATE" > "$BUILD_CONFIG"
+
+echo "🚀 Building with devcontainer CLI (features will be installed)..."
 
 # Build using devcontainer CLI - this will install all the features
 devcontainer build \
@@ -36,6 +61,9 @@ devcontainer build \
     --config "$BUILD_CONFIG"
 
 BUILD_EXIT_CODE=$?
+
+# Clean up temp file
+rm -f "$BUILD_CONFIG"
 
 if [ $BUILD_EXIT_CODE -ne 0 ]; then
     echo "❌ Devcontainer build failed with exit code $BUILD_EXIT_CODE"

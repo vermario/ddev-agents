@@ -40,3 +40,5 @@ services:
 volumes:
   copilot-state:
     name: ddev-${DDEV_PROJECT}-copilot-state
+  ddev-global-cache:
+    external: true

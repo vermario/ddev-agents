@@ -6,7 +6,7 @@
     "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
     "SSH_AUTH_SOCK": ""
   },
-  "name": "Wunder.io Agents Workspace",
+  "name": "Agents: __PROJECT_NAME__",
   "dockerComposeFile": [
     "../.ddev/.ddev-docker-compose-full.yaml"
   ],
@@ -14,9 +14,11 @@
   "workspaceFolder": "/workspace",
   "shutdownAction": "none",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "__NODE_VERSION__"
+    },
     "ghcr.io/devcontainers/features/php:1": {
-      "version": "8.4",
+      "version": "__PHP_VERSION__",
       "installComposer": true
     },
     "ghcr.io/devcontainers/features/github-cli:1": {
@@ -45,7 +47,9 @@
         "github.copilot.enable": {
           "*": true
         },
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "chat.mcp.gallery.enabled": true,
+        "chat.mcp.gallery.serviceUrl": "https://mcp.wdr.io"
       }
     },
     "jetbrains": {
