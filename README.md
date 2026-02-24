@@ -253,7 +253,12 @@ To fix the issue you need to remove the old images from your system by running t
 `docker images -a` <- find the devcontainer image id
 `docker rmi mcr.microsoft.com/devcontainers/python:3-bookworm`
 
-**Troubleshooting for macOS**: 
+**sudo not working inside the container:**
+> `sudo` is intentionally disabled via `no-new-privileges` for security hardening.
+> If you need root access, run from your host terminal:
+> `ddev ssh -s agents -u root`
+
+**Troubleshooting for macOS**:
 
 $GH_TOKEN is not recognized after rebuilding
 > Try launching VS Code directly from your terminal by running `code .` in your project folder. This ensures VS Code inherits your shell's environment variables.
