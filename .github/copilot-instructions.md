@@ -40,10 +40,6 @@ ddev start
 - **`devcontainer.build.json`** — used only during `ddev build-devcontainer`. Defines the base image and features to install.
 - **`devcontainer.json`** — used by VS Code/JetBrains to attach. References the DDEV-managed docker-compose stack (`../.ddev/.ddev-docker-compose-full.yaml`).
 
-### Files marked `#ddev-generated`
-
-Files with `#ddev-generated` as the first line are owned by this add-on and will be overwritten when consumers run `ddev addon get wunderio/ddev-agents` again. Do not instruct users to hand-edit these files unless they remove the `#ddev-generated` marker.
-
 ## 🔐 Security Conventions
 
 - **Never use `ARG` or `ENV` in Dockerfiles/devcontainer configs for sensitive data** (tokens, passwords, keys). Secrets are injected at runtime via `devcontainer exec` reading `remoteEnv` from `devcontainer.json`.
