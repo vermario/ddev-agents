@@ -19,6 +19,7 @@ post_install_actions:
   - mkdir -p ../.agents
   - cp -a .agents/. ../.agents/
   - rm -rf .agents
+  - '[ -f web-build/Dockerfile ] && grep -q "#ddev-generated" web-build/Dockerfile && rm web-build/Dockerfile || true' # Deprecate in 2.0
   - echo "🚀 DDEV Agents installed."
   - echo "👉 Run 'ddev restart' to build the Agents container."
   - echo "👉 Then reopen VS Code in the Container."
