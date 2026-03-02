@@ -183,7 +183,7 @@ echo "✅ VS Code MCP gallery config pre-populated (wdrmcp@${WDRMCP_VERSION})"
 # ==============================================================================
 # Generate Copilot CLI MCP config
 # ==============================================================================
-if [ -f "$PROJECT_ROOT/.agents/mcp.json" ]; then
+if [ -d "$PROJECT_ROOT/.agents/tools-config" ]; then
     docker exec -i -u vscode "$AGENTS_CONTAINER" bash -c 'mkdir -p ~/.copilot && cat > ~/.copilot/mcp-config.json' <<MCPCONFIG
 {
   "mcpServers": {
