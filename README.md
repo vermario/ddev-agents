@@ -114,7 +114,7 @@ Add it to your host machine's environment so the devcontainer can pick it up aut
     ```
 2.  Add this line at the end:
     ```bash
-    export DDEV_AGENTS_WQS_MCP_API_KEY=your_key_here
+    export WQS_MCP_API_KEY=your_key_here
     ```
 3.  Save and restart your terminal (or run `source ~/.zshrc`), then run `ddev restart`.
 
@@ -125,16 +125,16 @@ Add it to your host machine's environment so the devcontainer can pick it up aut
     ```
 2.  Add line:
     ```bash
-    DDEV_AGENTS_WQS_MCP_API_KEY=your_key_here
+    WQS_MCP_API_KEY=your_key_here
     ```
 3.  Save and run:
     ```bash
     systemctl --user daemon-reload
     ```
 
-Once set, the key is injected into the container as `$WQS_MCP_API_KEY` and used automatically by the MCP server — no credentials are stored inside the container.
+Once set, the key is injected into the container as `$WQS_MCP_API_KEY` and used by the MCP server during `ddev set-up`.
 
-
+## GitHub Copilot CLI
 
 Run GitHub Copilot CLI directly from your host terminal via `ddev copilot`, with all execution happening inside the isolated agents container.
 
@@ -230,7 +230,7 @@ Copilot will re-initialize on the next run.
 > Ensure `DDEV_AGENTS_GH_TOKEN` is set on your host and includes "Copilot Requests: Read-only" permission. Restart your terminal and run `ddev restart` after setting the token.
 
 **WQS MCP server not connecting:**
-> Ensure `DDEV_AGENTS_WQS_MCP_API_KEY` is set on your host machine (see [Wunder Quality System MCP](#wunder-quality-system-mcp)). Restart your terminal and run `ddev restart`.
+> Ensure `WQS_MCP_API_KEY` is set on your host machine (see [Wunder Quality System MCP](#wunder-quality-system-mcp)). Restart your terminal and run `ddev restart`.
 
 ## GitHub Authentication (Recommended Setup)
 
