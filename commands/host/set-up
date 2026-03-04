@@ -173,6 +173,13 @@ docker exec -i -u vscode "$AGENTS_CONTAINER" bash -c '
       ],
       "gallery": "https://mcp.wdr.io",
       "version": "${WDRMCP_VERSION}"
+    },
+    "wunder-quality-system": {
+      "type": "http",
+      "url": "https://quality.wunder.io/mcp",
+      "headers": {
+        "Authorization": "Bearer \${WQS_MCP_API_KEY}"
+      }
     }
   },
   "inputs": []
@@ -194,6 +201,13 @@ if [ -d "$PROJECT_ROOT/.agents/tools-config" ]; then
         "set -a; export DDEV_SSH_USER=${DDEV_USER:-}; [ -f /workspace/.env ] && source /workspace/.env; exec npx -y @wunderio/wdrmcp --tools-config /workspace/.agents/tools-config"
       ],
       "tools": ["*"]
+    },
+    "wunder-quality-system": {
+      "type": "http",
+      "url": "https://quality.wunder.io/mcp",
+      "headers": {
+        "Authorization": "Bearer \${WQS_MCP_API_KEY}"
+      }
     }
   }
 }

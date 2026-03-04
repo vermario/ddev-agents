@@ -72,6 +72,7 @@ In PhpStorm:
 -   **MCP Tool Configs**: Pre-configured tools for Drush, Composer, Drupal MCP proxy, and log access (`.agents/tools-config/`).
 -   **GitHub Copilot (Agent Mode)**: Includes the `copilot` CLI extension.
 -   **Secure Authentication**: Uses your host's `DDEV_AGENTS_GH_TOKEN` automatically, so you never have to type credentials inside the container.
+-   **Wunder Quality System MCP**: Pre-configured access to Wunder's quality standards and guidelines
 
 ## Architecture
 
@@ -93,7 +94,47 @@ The `.agents/tools-config/` directory contains YAML definitions for tools expose
 
 See `.agents/README.md` for details on adding custom tools and configuring credentials.
 
-## GitHub Copilot CLI — CLI
+## Wunder Quality System MCP
+
+The [Wunder Quality System](https://quality.wunder.io) (WQS) is Wunder's internal knowledge base of quality standards, best practices, and project guidelines. The WQS MCP server exposes this knowledge directly to AI agents, allowing them to reference Wunder's standards when generating code, writing documentation, or making architectural decisions.
+
+The `wunder-quality-system` MCP server is automatically configured in both VS Code and Copilot CLI during `ddev set-up`. It connects to `https://quality.wunder.io/mcp` using a shared API key.
+
+### WQS API Key Setup
+
+The API key is stored in **LastPass** — search for:
+> **Wunder Quality System MCP API key**
+
+Add it to your host machine's environment so the devcontainer can pick it up automatically.
+
+**For macOS (Zsh or Bash):**
+1.  Open your shell profile (e.g., `~/.zshrc` or `~/.profile`):
+    ```bash
+    nano ~/.zshrc
+    ```
+2.  Add this line at the end:
+    ```bash
+    export DDEV_AGENTS_WQS_MCP_API_KEY=your_key_here
+    ```
+3.  Save and restart your terminal (or run `source ~/.zshrc`), then run `ddev restart`.
+
+**For Linux/Ubuntu:**
+1.  Run:
+    ```bash
+    systemctl --user edit --full --force environment.d/myenv.conf
+    ```
+2.  Add line:
+    ```bash
+    DDEV_AGENTS_WQS_MCP_API_KEY=your_key_here
+    ```
+3.  Save and run:
+    ```bash
+    systemctl --user daemon-reload
+    ```
+
+Once set, the key is injected into the container as `$WQS_MCP_API_KEY` and used automatically by the MCP server — no credentials are stored inside the container.
+
+
 
 Run GitHub Copilot CLI directly from your host terminal via `ddev copilot`, with all execution happening inside the isolated agents container.
 
@@ -187,6 +228,9 @@ Copilot will re-initialize on the next run.
 
 **Authentication fails:**
 > Ensure `DDEV_AGENTS_GH_TOKEN` is set on your host and includes "Copilot Requests: Read-only" permission. Restart your terminal and run `ddev restart` after setting the token.
+
+**WQS MCP server not connecting:**
+> Ensure `DDEV_AGENTS_WQS_MCP_API_KEY` is set on your host machine (see [Wunder Quality System MCP](#wunder-quality-system-mcp)). Restart your terminal and run `ddev restart`.
 
 ## GitHub Authentication (Recommended Setup)
 
