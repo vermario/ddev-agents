@@ -1,9 +1,11 @@
 {
   "containerEnv": {
-    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}"
+    "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
+    "WQS_MCP_API_KEY": "${localEnv:WQS_MCP_API_KEY}"
   },
   "remoteEnv": {
     "GH_TOKEN": "${localEnv:DDEV_AGENTS_GH_TOKEN}",
+    "WQS_MCP_API_KEY": "${localEnv:WQS_MCP_API_KEY}",
     "SSH_AUTH_SOCK": ""
   },
   "name": "Agents: __PROJECT_NAME__ Build",

@@ -156,6 +156,7 @@ fi
 # for registryOnly access mode. This pre-populates it so the server is
 # auto-enabled without manual @mcp gallery installation.
 WDRMCP_VERSION=$(docker exec "$AGENTS_CONTAINER" npm view @wunderio/wdrmcp version 2>/dev/null || echo "0.1.17")
+SUPERGATEWAY_VERSION=$(docker exec "$AGENTS_CONTAINER" npm view supergateway version 2>/dev/null || echo "3.4.3")
 docker exec -i -u vscode "$AGENTS_CONTAINER" bash -c '
     mkdir -p ~/.vscode-server/data/User
     cat > ~/.vscode-server/data/User/mcp.json
@@ -173,6 +174,20 @@ docker exec -i -u vscode "$AGENTS_CONTAINER" bash -c '
       ],
       "gallery": "https://mcp.wdr.io",
       "version": "${WDRMCP_VERSION}"
+    },
+    "wunder-quality-system": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "supergateway@${SUPERGATEWAY_VERSION}",
+        "--streamableHttp",
+        "https://quality.wunder.io/mcp",
+        "--oauth2Bearer",
+        "${WQS_MCP_API_KEY}"
+      ],
+      "gallery": "https://mcp.wdr.io",
+      "version": "1.0.0"
     }
   },
   "inputs": []
@@ -194,6 +209,13 @@ if [ -d "$PROJECT_ROOT/.agents/tools-config" ]; then
         "set -a; export DDEV_SSH_USER=${DDEV_USER:-}; [ -f /workspace/.env ] && source /workspace/.env; exec npx -y @wunderio/wdrmcp --tools-config /workspace/.agents/tools-config"
       ],
       "tools": ["*"]
+    },
+    "wunder-quality-system": {
+      "type": "http",
+      "url": "https://quality.wunder.io/mcp",
+      "headers": {
+        "Authorization": "Bearer \${WQS_MCP_API_KEY}"
+      }
     }
   }
 }

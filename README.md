@@ -72,6 +72,7 @@ In PhpStorm:
 -   **MCP Tool Configs**: Pre-configured tools for Drush, Composer, Drupal MCP proxy, and log access (`.agents/tools-config/`).
 -   **GitHub Copilot (Agent Mode)**: Includes the `copilot` CLI extension.
 -   **Secure Authentication**: Uses your host's `DDEV_AGENTS_GH_TOKEN` automatically, so you never have to type credentials inside the container.
+-   **Wunder Quality System MCP**: Pre-configured access to Wunder's quality standards and guidelines
 
 ## Architecture
 
@@ -93,7 +94,35 @@ The `.agents/tools-config/` directory contains YAML definitions for tools expose
 
 See `.agents/README.md` for details on adding custom tools and configuring credentials.
 
-## GitHub Copilot CLI — CLI
+## Wunder Quality System MCP
+
+The [Wunder Quality System](https://quality.wunder.io) (WQS) is Wunder's internal knowledge base of quality standards, best practices, and project guidelines. The WQS MCP server exposes this knowledge directly to AI agents, allowing them to reference Wunder's standards when generating code, writing documentation, or making architectural decisions.
+
+The `wunder-quality-system` MCP server is automatically configured in both VS Code and Copilot CLI during `ddev set-up`. It connects to `https://quality.wunder.io/mcp` using a shared API key.
+
+### WQS API Key Setup
+
+The API key is stored in **LastPass** — search for:
+> **Wunder Quality System MCP API key**
+
+Add it to your shell profile so the devcontainer can pick it up automatically.
+
+1.  Open your shell profile file — use whichever matches your shell (e.g., `~/.bashrc` for Bash, `~/.zshrc` for Zsh):
+    ```bash
+    nano ~/.zshrc
+    ```
+2.  Add this line at the end:
+    ```bash
+    export WQS_MCP_API_KEY=your_key_here
+    ```
+3.  Save and reload your profile (use the same file you edited), then run `ddev restart`:
+    ```bash
+    source ~/.zshrc
+    ```
+
+Once set, the key is injected into the container as `$WQS_MCP_API_KEY` and used by the MCP server during `ddev set-up`.
+
+## GitHub Copilot CLI
 
 Run GitHub Copilot CLI directly from your host terminal via `ddev copilot`, with all execution happening inside the isolated agents container.
 
@@ -188,6 +217,9 @@ Copilot will re-initialize on the next run.
 **Authentication fails:**
 > Ensure `DDEV_AGENTS_GH_TOKEN` is set on your host and includes "Copilot Requests: Read-only" permission. Restart your terminal and run `ddev restart` after setting the token.
 
+**WQS MCP server not connecting:**
+> Ensure `WQS_MCP_API_KEY` is set on your host machine (see [Wunder Quality System MCP](#wunder-quality-system-mcp)). Restart your terminal and run `ddev restart`.
+
 ## GitHub Authentication (Recommended Setup)
 
 To use GitHub Copilot (Agent Mode) or `gh` commands without repetitive logins, set up a Personal Access Token (PAT) on your **host machine**.
@@ -204,8 +236,7 @@ To use GitHub Copilot (Agent Mode) or `gh` commands without repetitive logins, s
 ### 2. Configure your Host Machine
 Add the token to your shell profile so it's always available when you start the devcontainer.
 
-**For macOS (Zsh or Bash):**
-1.  Open your shell profile (e.g., `~/.zshrc` or `~/.profile`):
+1.  Open your shell profile file — use whichever matches your shell (e.g., `~/.bashrc` for Bash, `~/.zshrc` for Zsh):
     ```bash
     nano ~/.zshrc
     ```
@@ -213,20 +244,9 @@ Add the token to your shell profile so it's always available when you start the 
     ```bash
     export DDEV_AGENTS_GH_TOKEN=your_token_here
     ```
-3.  Save and restart your terminal (or run `source ~/.zshrc`).
-
-**For Linux/Ubuntu:**
-1.  Run 
+3.  Save and reload your profile (use the same file you edited):
     ```bash
-    systemctl --user edit --full --force environment.d/myenv.conf`
-    ```
-2.  Add line:
-    ```bash
-    DDEV_AGENTS_GH_TOKEN=your_token_here
-    ```
-3.  Save and run
-    ```bash
-    systemctl --user daemon-reload
+    source ~/.zshrc
     ```
 
 
