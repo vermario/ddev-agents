@@ -105,10 +105,9 @@ The `wunder-quality-system` MCP server is automatically configured in both VS Co
 The API key is stored in **LastPass** — search for:
 > **Wunder Quality System MCP API key**
 
-Add it to your host machine's environment so the devcontainer can pick it up automatically.
+Add it to your shell profile so the devcontainer can pick it up automatically.
 
-**For macOS (Zsh or Bash):**
-1.  Open your shell profile (e.g., `~/.zshrc` or `~/.profile`):
+1.  Open your shell profile file — use whichever matches your shell (e.g., `~/.bashrc` for Bash, `~/.zshrc` for Zsh):
     ```bash
     nano ~/.zshrc
     ```
@@ -116,20 +115,9 @@ Add it to your host machine's environment so the devcontainer can pick it up aut
     ```bash
     export WQS_MCP_API_KEY=your_key_here
     ```
-3.  Save and restart your terminal (or run `source ~/.zshrc`), then run `ddev restart`.
-
-**For Linux/Ubuntu:**
-1.  Run:
+3.  Save and reload your profile (use the same file you edited), then run `ddev restart`:
     ```bash
-    systemctl --user edit --full --force environment.d/myenv.conf
-    ```
-2.  Add line:
-    ```bash
-    WQS_MCP_API_KEY=your_key_here
-    ```
-3.  Save and run:
-    ```bash
-    systemctl --user daemon-reload
+    source ~/.zshrc
     ```
 
 Once set, the key is injected into the container as `$WQS_MCP_API_KEY` and used by the MCP server during `ddev set-up`.
@@ -248,8 +236,7 @@ To use GitHub Copilot (Agent Mode) or `gh` commands without repetitive logins, s
 ### 2. Configure your Host Machine
 Add the token to your shell profile so it's always available when you start the devcontainer.
 
-**For macOS (Zsh or Bash):**
-1.  Open your shell profile (e.g., `~/.zshrc` or `~/.profile`):
+1.  Open your shell profile file — use whichever matches your shell (e.g., `~/.bashrc` for Bash, `~/.zshrc` for Zsh):
     ```bash
     nano ~/.zshrc
     ```
@@ -257,20 +244,9 @@ Add the token to your shell profile so it's always available when you start the 
     ```bash
     export DDEV_AGENTS_GH_TOKEN=your_token_here
     ```
-3.  Save and restart your terminal (or run `source ~/.zshrc`).
-
-**For Linux/Ubuntu:**
-1.  Run 
+3.  Save and reload your profile (use the same file you edited):
     ```bash
-    systemctl --user edit --full --force environment.d/myenv.conf`
-    ```
-2.  Add line:
-    ```bash
-    DDEV_AGENTS_GH_TOKEN=your_token_here
-    ```
-3.  Save and run
-    ```bash
-    systemctl --user daemon-reload
+    source ~/.zshrc
     ```
 
 
