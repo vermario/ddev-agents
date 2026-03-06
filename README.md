@@ -28,7 +28,6 @@ In your DDEV project directory, run:
 
 ```bash
 ddev addon get wunderio/ddev-agents
-ddev restart
 ```
 
 ### Step 2: Set Up GitHub Authentication
@@ -80,8 +79,10 @@ The [Wunder Quality System](https://quality.wunder.io) MCP server gives AI agent
 
 ### Step 4: Start DDEV
 
+Once the environment variables are in place, start (or restart) DDEV so the container picks them up:
+
 ```bash
-ddev start
+ddev restart
 ```
 
 ### Step 5: Open in Your Editor
