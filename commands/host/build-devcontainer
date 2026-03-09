@@ -1,5 +1,5 @@
-#ddev-generated
 #!/bin/bash
+#ddev-generated
 
 ## Description: Build devcontainer image before DDEV starts
 ## Usage: build-devcontainer
