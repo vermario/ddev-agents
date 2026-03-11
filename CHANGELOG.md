@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-03-11
+
+### Fixed
+
+- Fix `#ddev-generated` on first line in `build-devcontainer` command
+
+### Changed
+
+- Restructure README with logical Getting Started walkthrough
+
 ## [1.1] - 2026-03-05
 
 ### Added
@@ -84,7 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/wunderio/ddev-agents/compare/1.1...HEAD
+[Unreleased]: https://github.com/wunderio/ddev-agents/compare/1.1.1...HEAD
+[1.1.1]: https://github.com/wunderio/ddev-agents/compare/1.1...1.1.1
 [1.1]: https://github.com/wunderio/ddev-agents/compare/1.0.1...1.1
 [1.0.1]: https://github.com/wunderio/ddev-agents/compare/1.0...1.0.1
 [1.0]: https://github.com/wunderio/ddev-agents/compare/0.4.1...1.0
