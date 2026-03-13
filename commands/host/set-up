@@ -55,6 +55,20 @@ if [ -f "$DEVCONTAINER_JSON" ] && grep -q "__PHP_VERSION__\|__NODE_VERSION__\|__
     rm -f "${DEVCONTAINER_JSON}.bak"
 fi
 
+# ==============================================================================
+# Verify host Node.js (needed for devcontainer CLI and npx -y in MCP configs)
+# ==============================================================================
+NODE_MIN=18
+if ! command -v node &>/dev/null; then
+    echo "❌ Node.js is not installed. Version ${NODE_MIN}+ is required."
+    exit 1
+fi
+HOST_NODE_MAJOR=$(node -e 'console.log(process.versions.node.split(".")[0])')
+if [ "${HOST_NODE_MAJOR:-0}" -lt "$NODE_MIN" ] 2>/dev/null; then
+    echo "❌ Node.js $(node --version) is too old. Version ${NODE_MIN}+ is required."
+    exit 1
+fi
+
 # Ensure devcontainer CLI is available
 if ! command -v devcontainer &>/dev/null; then
     echo "⚠️  devcontainer CLI not found. Installing..."
