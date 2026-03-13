@@ -58,13 +58,20 @@ fi
 # ==============================================================================
 # Verify host Node.js (needed for devcontainer CLI and npx -y in MCP configs)
 # ==============================================================================
-NODE_MIN=18
+NODE_MIN=22
 if ! command -v node &>/dev/null; then
     echo "❌ Node.js is not installed. Version ${NODE_MIN}+ is required."
     exit 1
 fi
-HOST_NODE_MAJOR=$(node -e 'console.log(process.versions.node.split(".")[0])')
-if [ "${HOST_NODE_MAJOR:-0}" -lt "$NODE_MIN" ] 2>/dev/null; then
+if ! HOST_NODE_MAJOR=$(node -e 'process.stdout.write(process.versions.node.split(".")[0])' 2>/dev/null); then
+    echo "❌ Failed to determine Node.js version. Version ${NODE_MIN}+ is required."
+    exit 1
+fi
+if ! [[ "$HOST_NODE_MAJOR" =~ ^[0-9]+$ ]]; then
+    echo "❌ Unexpected Node.js version format: $(node --version). Version ${NODE_MIN}+ is required."
+    exit 1
+fi
+if [ "$HOST_NODE_MAJOR" -lt "$NODE_MIN" ]; then
     echo "❌ Node.js $(node --version) is too old. Version ${NODE_MIN}+ is required."
     exit 1
 fi
