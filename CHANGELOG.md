@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-03-16
+
+### Changed
+
+- Require Node.js 22+ on the host and add a version check to the `set-up` script
+
 ## [1.1.1] - 2026-03-11
 
 ### Fixed
@@ -94,7 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/wunderio/ddev-agents/compare/1.1.1...HEAD
+[Unreleased]: https://github.com/wunderio/ddev-agents/compare/1.1.2...HEAD
+[1.1.2]: https://github.com/wunderio/ddev-agents/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/wunderio/ddev-agents/compare/1.1...1.1.1
 [1.1]: https://github.com/wunderio/ddev-agents/compare/1.0.1...1.1
 [1.0.1]: https://github.com/wunderio/ddev-agents/compare/1.0...1.0.1
