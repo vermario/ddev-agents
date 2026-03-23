@@ -8,7 +8,7 @@
     "WQS_MCP_API_KEY": "${localEnv:WQS_MCP_API_KEY}",
     "SSH_AUTH_SOCK": ""
   },
-  "name": "Agents: ddev-agents",
+  "name": "Agents: __PROJECT_NAME__",
   "dockerComposeFile": [
     "../.ddev/.ddev-docker-compose-full.yaml"
   ],
@@ -17,10 +17,10 @@
   "shutdownAction": "none",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
+      "version": "__NODE_VERSION__"
     },
     "ghcr.io/devcontainers/features/php:1": {
-      "version": "8.3",
+      "version": "__PHP_VERSION__",
       "installComposer": true
     },
     "ghcr.io/devcontainers/features/github-cli:1": {
